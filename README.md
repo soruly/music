@@ -13,12 +13,14 @@ server {
     server_name music.your.domain;
 
     location / {
+        root "/mnt/Data/Music";
+    }
+
+    location ~ \/$ {
         autoindex on;
         autoindex_format json;
-        root /mnt/Data/Music;
-        index index.html;
-        try_files $uri $uri/ /index.html;
-
+        root /var/www/music;
+        try_files $uri /index.html;
         if ($http_x_requested_with = "XMLHttpRequest") {
             root "/mnt/Data/Music";
         }
