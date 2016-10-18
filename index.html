@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="shortcut icon" type="image/jpeg" href="/cover.jpg">
+<title>Music</title>
+<style>
+
+  body {
+    margin: 0;
+    padding: 0;
+    font: 100% sans-serif;
+  }
+
+  #player {
+    z-index: 1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 32px;
+  }
+
+  #art {
+    background-image: url(/cover.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: fixed;
+    top: 32px;
+    right: 0;
+    width: 300px;
+    height: 300px;
+  }
+
+  #list {
+    position: fixed;
+    top: 32px;
+    bottom: 0;
+    left: 0;
+    right: 300px;
+    overflow: auto;
+  }
+
+  .directory, .file {
+    padding: 0.4em;
+    font-size: 1em;
+  }
+
+  .directory:hover, .file:hover {
+    background-color: #eee;
+    cursor: pointer;
+  }
+
+  .file::before, .directory::before, .highlight::before {
+    font-family: Webdings;
+  }
+
+  .file::before {
+    content:" ";
+  }
+
+  .directory::before {
+    content:" ";
+  }
+
+  .highlight, .highlight:hover {
+    background-color:#EEF;
+  }
+
+  .highlight::before {
+    content:" ";
+  }
+
+  .active {
+    cursor: pointer;
+  }
+}
+</style>
+
+<audio id="player" autoplay loop controls></audio>
+<div id="list"></div>
+<div id="art"></div>
+<script>
+
+var xhr = new XMLHttpRequest();
+var getListing = function(){
+  //encodeURIComponent
+  xhr.open("GET", window.location.pathname, true);
+  xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState != 4 || xhr.status != 200) return;
+    renderList(JSON.parse(xhr.responseText));
+  };
+  xhr.send();
+}
+getListing();
+window.onpopstate = getListing;
+
+var renderList = function(list) {
+  var listNode = document.querySelector("#list");
+  while (listNode.firstChild) {
+    listNode.removeChild(listNode.firstChild);
+  }
+  list.forEach(function(entry){
+    var itemNode = document.createElement("div");
+    itemNode.classList.add(entry.type);
+    if(entry.type === "directory") {
+      itemNode.onmouseup = lsDir;
+    }
+    else {
+      itemNode.onmouseup = playfile;
+    }
+    itemNode.appendChild(document.createTextNode(entry.name));
+    listNode.appendChild(itemNode);
+  });
+  document.querySelector("#art").style.backgroundImage = "url('"+window.location.pathname+"cover.jpg')";
+  document.querySelector("link[rel='shortcut icon']").href = "cover.jpg";
+}
+
+var lsDir = function(event){
+  if(event.which == 1){
+    history.pushState(null, null, window.location.pathname+this.innerText+'/');
+    getListing();
+  }
+};
+
+var playfile = function(event){
+  if(event.which == 1){
+    if(document.querySelector(".highlight"))
+      document.querySelector(".highlight").classList.remove("highlight");
+    this.classList.add("highlight");
+    document.querySelector("#player").src = window.location.pathname+this.innerText;
+    document.querySelector("#player").load();
+    document.querySelector("#art").classList.add("active");
+    document.title = this.innerText;
+  }
+};
+
+var playpause = function() {
+  if(document.querySelector("#player").paused){
+    document.querySelector("#player").trigger("play");
+  }
+  else{
+    document.querySelector("#player").trigger("pause");
+  }
+};
+
+document.querySelector("#art").click(playpause);
+
+document.onkeyup = function(event){
+  var player = document.querySelector("#player");
+  var seek = 5;
+  if(event.ctrlKey)
+    seek = 30;
+  if(event.which == 32) //space
+    playpause();
+  if(event.which == 37) //left
+    player.currentTime = player.currentTime < seek ? 0 : player.currentTime - seek;
+  if(event.which == 39) //right
+    player.currentTime = player.duration - player.currentTime < seek ? player.duration : player.currentTime + seek;
+  if(event.which == 38) //up
+    player.volume = player.volume > 0.9 ? 1 : player.volume + 0.1;
+  if(event.which == 40) //down
+    player.volume = player.volume < 0.1 ? 0 : player.volume - 0.1;
+};
+document.onkeydown = function(event){
+  if(event.which >= 37 && event.which <= 40)
+    event.preventDefault();
+  if(event.which == 32)
+    event.preventDefault();
+};
+</script>
+
