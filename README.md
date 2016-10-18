@@ -5,22 +5,24 @@ No server side script, no javascript dependencies.
 - Nginx >= 1.7.9
 
 ## Installation
-Nginx config example
+Put `index.html` in `/mnt/Data/Music`
+Configure Nginx
 ```
 server {
-        listen 443 ssl http2;
-        server_name music.your.domain;
+    listen 443 ssl http2;
+    server_name music.your.domain;
 
-        location / {
-          autoindex on;
-          autoindex_format json;
-          root /var/www/music;
-          index index.html;
-          
-          if ($http_x_requested_with = "XMLHttpRequest") {
-            root "/path/to/your/Music";
-          }
+    location / {
+        autoindex on;
+        autoindex_format json;
+        root /mnt/Data/Music;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+
+        if ($http_x_requested_with = "XMLHttpRequest") {
+            root "/mnt/Data/Music";
         }
+    }
 }
 ```
 
