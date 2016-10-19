@@ -133,16 +133,16 @@ var playfile = function(event){
 
 var playpause = function() {
   if(document.querySelector("#player").paused){
-    document.querySelector("#player").trigger("play");
+    document.querySelector("#player").play();
   }
   else{
-    document.querySelector("#player").trigger("pause");
+    document.querySelector("#player").pause();
   }
 };
 
 document.querySelector("#art").click(playpause);
 
-document.onkeyup = function(event){
+window.onkeyup = function(event) {
   var player = document.querySelector("#player");
   var seek = 5;
   if(event.ctrlKey)
@@ -158,7 +158,7 @@ document.onkeyup = function(event){
   if(event.which == 40) //down
     player.volume = player.volume < 0.1 ? 0 : player.volume - 0.1;
 };
-document.onkeydown = function(event){
+window.onkeydown = function(event) {
   if(event.which >= 37 && event.which <= 40)
     event.preventDefault();
   if(event.which == 32)
