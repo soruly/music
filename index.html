@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link rel="shortcut icon" type="image/jpeg" href="/cover.jpg">
+<link rel="shortcut icon" type="image/jpeg" href="">
 <title>Music</title>
 <style>
 
@@ -22,7 +22,7 @@
   }
 
   #art {
-    background-image: url(/cover.jpg);
+    background-image: url();
     background-repeat: no-repeat;
     background-size: cover;
     position: fixed;
@@ -80,7 +80,6 @@
 
 var xhr = new XMLHttpRequest();
 var getListing = function(){
-  //encodeURIComponent
   xhr.open("GET", window.location.pathname, true);
   xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
   xhr.onreadystatechange = function () {
@@ -93,11 +92,20 @@ getListing();
 window.onpopstate = getListing;
 
 var renderList = function(list) {
+  document.querySelector("#art").style.backgroundImage = "url()";
+  document.querySelector("link[rel='shortcut icon']").href = "";
   var listNode = document.querySelector("#list");
   while (listNode.firstChild) {
     listNode.removeChild(listNode.firstChild);
   }
   list.forEach(function(entry){
+    if (entry.type === "file") {
+        if (entry.name === "cover.jpg") {
+            document.querySelector("#art").style.backgroundImage = "url(cover.jpg)";
+            document.querySelector("link[rel='shortcut icon']").href = "cover.jpg";
+            return;
+        }
+    }
     var itemNode = document.createElement("div");
     itemNode.classList.add(entry.type);
     if(entry.type === "directory") {
@@ -109,8 +117,6 @@ var renderList = function(list) {
     itemNode.appendChild(document.createTextNode(entry.name));
     listNode.appendChild(itemNode);
   });
-  document.querySelector("#art").style.backgroundImage = "url('"+window.location.pathname+"cover.jpg')";
-  document.querySelector("link[rel='shortcut icon']").href = "cover.jpg";
 }
 
 var lsDir = function(event){
