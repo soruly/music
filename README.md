@@ -5,8 +5,7 @@ No server side script, no javascript dependencies.
 - Nginx >= 1.7.9
 
 ## Installation
-Put `index.html` in `/var/www/music`
-Configure Nginx
+Put `index.html` in `/var/www/music`, and configure Nginx like this
 ```
 server {
         listen 443 ssl http2;
