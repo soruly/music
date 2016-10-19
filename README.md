@@ -5,7 +5,7 @@ No server side script, no javascript dependencies.
 - Nginx >= 1.7.9
 
 ## Installation
-Put `index.html` in `/mnt/Data/Music`
+Put `index.html` in `/var/www/music`
 Configure Nginx
 ```
 server {
