@@ -77,97 +77,79 @@
 <div id="list"></div>
 <div id="art"></div>
 <script>
-
 var xhr = new XMLHttpRequest();
-var getListing = function(){
-  xhr.open("GET", '/api'+window.location.pathname, true);
-  xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
-  xhr.onreadystatechange = function () {
+var getListing = function() {
+  xhr.open("GET", '/api' + window.location.pathname, true);
+  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+  xhr.onreadystatechange = function() {
     if (xhr.readyState != 4 || xhr.status != 200) return;
-    renderList(JSON.parse(xhr.responseText));
+    (function(fileList) {
+      document.querySelector("#art").style.backgroundImage = "url()";
+      document.querySelector("link[rel='shortcut icon']").href = "";
+      var listNode = document.querySelector("#list");
+      while (listNode.firstChild) {
+        listNode.removeChild(listNode.firstChild);
+      }
+      fileList.forEach(function(entry) {
+        if (entry.type === "file") {
+          if (entry.name === "cover.jpg") {
+            document.querySelector("#art").style.backgroundImage = "url(/file" + window.location.pathname + "cover.jpg)";
+            document.querySelector("link[rel='shortcut icon']").href = "/file" + window.location.pathname + "cover.jpg";
+            return;
+          }
+        }
+        var itemNode = document.createElement("div");
+        itemNode.classList.add(entry.type);
+        if (entry.type === "directory") {
+          itemNode.onmouseup = function(event) {
+            if (event.which === 1) {
+              history.pushState(null, null, window.location.pathname + this.innerText + '/');
+              getListing();
+            }
+          };
+        } else {
+          itemNode.onmouseup = function(event) {
+            if (event.which === 1) {
+              if (document.querySelector(".highlight"))
+                document.querySelector(".highlight").classList.remove("highlight");
+              this.classList.add("highlight");
+              document.querySelector("#player").src = '/file' + window.location.pathname + this.innerText;
+              document.querySelector("#player").load();
+              document.title = this.innerText;
+            }
+          };
+        }
+        itemNode.appendChild(document.createTextNode(entry.name));
+        listNode.appendChild(itemNode);
+      });
+    })(JSON.parse(xhr.responseText));
   };
   xhr.send();
 }
 getListing();
 window.onpopstate = getListing;
 
-var renderList = function(list) {
-  document.querySelector("#art").style.backgroundImage = "url()";
-  document.querySelector("link[rel='shortcut icon']").href = "";
-  var listNode = document.querySelector("#list");
-  while (listNode.firstChild) {
-    listNode.removeChild(listNode.firstChild);
-  }
-  list.forEach(function(entry){
-    if (entry.type === "file") {
-        if (entry.name === "cover.jpg") {
-            document.querySelector("#art").style.backgroundImage = "url(/file"+window.location.pathname+"cover.jpg)";
-            document.querySelector("link[rel='shortcut icon']").href = "/file"+window.location.pathname+"cover.jpg";
-            return;
-        }
-    }
-    var itemNode = document.createElement("div");
-    itemNode.classList.add(entry.type);
-    if(entry.type === "directory") {
-      itemNode.onmouseup = lsDir;
-    }
-    else {
-      itemNode.onmouseup = playfile;
-    }
-    itemNode.appendChild(document.createTextNode(entry.name));
-    listNode.appendChild(itemNode);
-  });
-}
-
-var lsDir = function(event){
-  if(event.which == 1){
-    history.pushState(null, null, window.location.pathname+this.innerText+'/');
-    getListing();
-  }
-};
-
-var playfile = function(event){
-  if(event.which == 1){
-    if(document.querySelector(".highlight"))
-      document.querySelector(".highlight").classList.remove("highlight");
-    this.classList.add("highlight");
-    document.querySelector("#player").src = '/file'+window.location.pathname+this.innerText;
-    document.querySelector("#player").load();
-    document.title = this.innerText;
-  }
-};
-
-var playpause = function() {
-  if(document.querySelector("#player").paused){
-    document.querySelector("#player").play();
-  }
-  else{
-    document.querySelector("#player").pause();
-  }
-};
-
-document.querySelector("#art").click(playpause);
-
 window.onkeyup = function(event) {
   var player = document.querySelector("#player");
   var seek = 5;
-  if(event.ctrlKey)
+  if (event.ctrlKey)
     seek = 30;
-  if(event.which == 32) //space
-    playpause();
-  if(event.which == 37) //left
+  if (event.which == 32) //space
+    player.paused ? player.play() : player.pause();
+  if (event.which == 37) //left
     player.currentTime = player.currentTime < seek ? 0 : player.currentTime - seek;
-  if(event.which == 39) //right
+  if (event.which == 39) //right
     player.currentTime = player.duration - player.currentTime < seek ? player.duration : player.currentTime + seek;
-  if(event.which == 38) //up
+  if (event.which == 38) //up
     player.volume = player.volume > 0.9 ? 1 : player.volume + 0.1;
-  if(event.which == 40) //down
+  if (event.which == 40) //down
     player.volume = player.volume < 0.1 ? 0 : player.volume - 0.1;
 };
+
 window.onkeydown = function(event) {
-  if(event.which >= 37 && event.which <= 40)
+  if (event.which >= 37 && event.which <= 40)
     event.preventDefault();
-  if(event.which == 32)
+  if (event.which == 32)
     event.preventDefault();
 };
 </script>
