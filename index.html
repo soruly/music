@@ -71,10 +71,6 @@
     content:" ";
   }
 
-  .active {
-    cursor: pointer;
-  }
-}
 </style>
 
 <audio id="player" autoplay loop controls></audio>
@@ -131,7 +127,6 @@ var playfile = function(event){
     this.classList.add("highlight");
     document.querySelector("#player").src = window.location.pathname+this.innerText;
     document.querySelector("#player").load();
-    document.querySelector("#art").classList.add("active");
     document.title = this.innerText;
   }
 };
