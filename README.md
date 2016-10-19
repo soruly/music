@@ -9,22 +9,23 @@ Put `index.html` in `/mnt/Data/Music`
 Configure Nginx
 ```
 server {
-    listen 443 ssl http2;
-    server_name music.your.domain;
+        listen 443 ssl http2;
+        server_name music.your.domain;
 
-    location / {
-        autoindex on;
-        autoindex_format json;
-        root /var/www/music;
-        try_files $uri /index.html;
-        if ($http_x_requested_with = "XMLHttpRequest") {
-            root "/mnt/snowy/Music";
+        location / {
+            root /var/www/music;
+            try_files $uri /index.html;
         }
-    }
 
-    location ~ \.(mp3|jpg)$ {
-        root "/mnt/snowy/Music";
-    }
+        location /api {
+            autoindex on;
+            autoindex_format json;
+            alias "/mnt/Data/Music";
+        }
+
+        location /file {
+            alias "/mnt/Data/Music";
+        }
 }
 ```
 

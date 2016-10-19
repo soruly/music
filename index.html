@@ -80,7 +80,7 @@
 
 var xhr = new XMLHttpRequest();
 var getListing = function(){
-  xhr.open("GET", window.location.pathname, true);
+  xhr.open("GET", '/api'+window.location.pathname, true);
   xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
   xhr.onreadystatechange = function () {
     if (xhr.readyState != 4 || xhr.status != 200) return;
@@ -101,8 +101,8 @@ var renderList = function(list) {
   list.forEach(function(entry){
     if (entry.type === "file") {
         if (entry.name === "cover.jpg") {
-            document.querySelector("#art").style.backgroundImage = "url(cover.jpg)";
-            document.querySelector("link[rel='shortcut icon']").href = "cover.jpg";
+            document.querySelector("#art").style.backgroundImage = "url(/file"+window.location.pathname+"cover.jpg)";
+            document.querySelector("link[rel='shortcut icon']").href = "/file"+window.location.pathname+"cover.jpg";
             return;
         }
     }
@@ -131,7 +131,7 @@ var playfile = function(event){
     if(document.querySelector(".highlight"))
       document.querySelector(".highlight").classList.remove("highlight");
     this.classList.add("highlight");
-    document.querySelector("#player").src = window.location.pathname+this.innerText;
+    document.querySelector("#player").src = '/file'+window.location.pathname+this.innerText;
     document.querySelector("#player").load();
     document.title = this.innerText;
   }
