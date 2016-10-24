@@ -107,17 +107,32 @@
 <script>
 var xhr = new XMLHttpRequest();
 var getListing = function() {
+
+  var clearListTimer = setTimeout(function() {
+    var listNode = document.querySelector("#list");
+    while (listNode.firstChild) {
+      listNode.removeChild(listNode.firstChild);
+    }
+    listNode.appendChild(document.createTextNode("Loading..."));
+  },200);
+
   xhr.open("GET", '/api' + window.location.pathname, true);
   xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
   xhr.onreadystatechange = function() {
+
     if (xhr.readyState != 4 || xhr.status != 200) return;
+
+    clearTimeout(clearListTimer);
+    var listNode = document.querySelector("#list");
+    while (listNode.firstChild) {
+      listNode.removeChild(listNode.firstChild);
+    }
+
     (function(fileList) {
+
       document.querySelector("#art").style.backgroundImage = "url()";
       document.querySelector("link[rel='shortcut icon']").href = "";
-      var listNode = document.querySelector("#list");
-      while (listNode.firstChild) {
-        listNode.removeChild(listNode.firstChild);
-      }
+
       fileList.forEach(function(entry) {
         if (entry.type === "file") {
           if (entry.name === "cover.jpg") {
@@ -135,7 +150,8 @@ var getListing = function() {
               getListing();
             }
           };
-        } else if(entry.name.substr(-4).toLowerCase() === ".mp3") {
+        }
+        else if(entry.name.substr(-4).toLowerCase() === ".mp3") {
           itemNode.onmouseup = function(event) {
             if (event.which === 1) {
               if (document.querySelector(".highlight"))
@@ -147,7 +163,8 @@ var getListing = function() {
               document.querySelector('#title').innerText = this.innerText;
             }
           };
-        } else {
+        }
+        else {
           itemNode.onmouseup = function(event) {
             if (event.which === 1) {
               window.open('/file' + window.location.pathname + this.innerText);
@@ -155,9 +172,11 @@ var getListing = function() {
           };
         }
         itemNode.appendChild(document.createTextNode(entry.name));
-        listNode.appendChild(itemNode);
+        document.querySelector("#list").appendChild(itemNode);
       });
+
     })(JSON.parse(xhr.responseText));
+
   };
   xhr.send();
 }
@@ -188,4 +207,3 @@ window.onkeydown = function(event) {
     event.preventDefault();
 };
 </script>
-
