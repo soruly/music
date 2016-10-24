@@ -11,6 +11,36 @@
     font: 100% sans-serif;
   }
 
+  .directory, .file {
+    padding: 0.4em;
+    font-size: 1em;
+  }
+
+  .directory:hover, .file:hover {
+    background-color: #eee;
+    cursor: pointer;
+  }
+
+  .file::before, .directory::before, .highlight::before {
+    font-family: Webdings;
+  }
+
+  .file::before {
+    content:" ";
+  }
+
+  .directory::before {
+    content:" ";
+  }
+
+  .highlight, .highlight:hover {
+    background-color:#EEF;
+  }
+
+  .highlight::before {
+    content:" ";
+  }
+
   #player {
     z-index: 1;
     position: fixed;
@@ -41,34 +71,34 @@
     overflow: auto;
   }
 
-  .directory, .file {
-    padding: 0.4em;
-    font-size: 1em;
+  @media (max-width: 600px) and (min-aspect-ratio: 3/5) {
+    body {background: #DDF;}
+
+    #art {
+      display: none;
+    }
+
+    #list {
+      right: 0;
+    }
+
   }
 
-  .directory:hover, .file:hover {
-    background-color: #eee;
-    cursor: pointer;
-  }
+  @media (max-width: 600px) and (max-aspect-ratio: 3/5) {
+    body {background: #FDD;}
 
-  .file::before, .directory::before, .highlight::before {
-    font-family: Webdings;
-  }
+    #art {
+      width: 100vw;
+      height: 100vw;
+      max-width: 100vw;
+      max-height: 100vw;
+    }
 
-  .file::before {
-    content:" ";
-  }
+    #list {
+      right: 0;
+      top: calc(100vw + 32px);
+    }
 
-  .directory::before {
-    content:" ";
-  }
-
-  .highlight, .highlight:hover {
-    background-color:#EEF;
-  }
-
-  .highlight::before {
-    content:" ";
   }
 
 </style>
