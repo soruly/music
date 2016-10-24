@@ -121,7 +121,7 @@ var getListing = function() {
       fileList.forEach(function(entry) {
         if (entry.type === "file") {
           if (entry.name === "cover.jpg") {
-            document.querySelector("#art").style.backgroundImage = "url(/file" + window.location.pathname + "cover.jpg)";
+            document.querySelector("#art").style.backgroundImage = "url('/file" + window.location.pathname + "cover.jpg')";
             document.querySelector("link[rel='shortcut icon']").href = "/file" + window.location.pathname + "cover.jpg";
             return;
           }
