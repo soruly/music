@@ -52,6 +52,7 @@
   }
 
   #art {
+    display: none;
     background-image: url();
     background-repeat: no-repeat;
     background-size: cover;
@@ -60,6 +61,8 @@
     right: 0;
     width: 300px;
     height: 300px;
+    max-width: calc(100vh - 32px);
+    max-height: calc(100vh - 32px);
   }
 
   #list {
@@ -67,27 +70,30 @@
     top: 32px;
     bottom: 0;
     left: 0;
-    right: 300px;
+    right: 0;
     overflow: auto;
   }
 
-  @media (max-width: 600px) and (min-aspect-ratio: 3/5) {
-    body {background: #DDF;}
+  @media (min-width: 600px) {
 
     #art {
-      display: none;
+      display: inline;
+      top: 32px;
+      right: 0;
+      width: 300px;
+      height: 300px;
     }
 
     #list {
-      right: 0;
+      right: 300px;
     }
 
   }
 
-  @media (max-width: 600px) and (max-aspect-ratio: 3/5) {
-    body {background: #FDD;}
+  @media (max-width: 600px) and (max-aspect-ratio: 7/10) {
 
     #art {
+      display: inline;
       width: 100vw;
       height: 100vw;
       max-width: 100vw;
