@@ -135,7 +135,7 @@ var getListing = function() {
               getListing();
             }
           };
-        } else {
+        } else if(entry.name.substr(-4).toLowerCase() === ".mp3") {
           itemNode.onmouseup = function(event) {
             if (event.which === 1) {
               if (document.querySelector(".highlight"))
@@ -145,6 +145,12 @@ var getListing = function() {
               document.querySelector("#player").load();
               document.title = this.innerText;
               document.querySelector('#title').innerText = this.innerText;
+            }
+          };
+        } else {
+          itemNode.onmouseup = function(event) {
+            if (event.which === 1) {
+              window.open('/file' + window.location.pathname + this.innerText);
             }
           };
         }
