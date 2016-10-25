@@ -39,7 +39,7 @@
     left: 0;
     right: 0;
     width: 100%;
-    height: 4rem;
+    height: 6rem;
     box-shadow: 0 0 1rem rgba(0,0,0,0.2);
   }
 
@@ -54,8 +54,13 @@
     flex: 1 0 auto;
     width: 100%;
     height: 2rem;
-    line-height: 2rem;
+    line-height: 1.5rem;
     padding: 0 0.5rem 0 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  #title:first-line {
+    font-size: 1rem;
   }
 
   #player {
@@ -68,14 +73,14 @@
     background-image: url();
     background-repeat: no-repeat;
     background-size: cover;
-    width: 4rem;
-    height: 4rem;
+    width: 6rem;
+    height: 6rem;
   }
 
   #list {
     position: fixed;
     top: 0;
-    bottom: 4rem;
+    bottom: 6rem;
     left: 0;
     right: 0;
     overflow: auto;
@@ -183,7 +188,7 @@ var getListing = function() {
               document.querySelector("#player").src = '/file' + window.location.pathname + this.innerText;
               document.querySelector("#player").load();
               document.title = this.innerText;
-              document.querySelector('#title').innerText = this.innerText;
+              document.querySelector('#title').innerText = this.innerText.slice(0,-4) + "\n" + decodeURI(window.location.pathname).split("/")[3];
             }
           };
         }
