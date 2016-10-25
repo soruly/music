@@ -160,12 +160,8 @@ var getListing = function() {
       document.querySelector("link[rel='shortcut icon']").href = "";
 
       fileList.forEach(function(entry) {
-        if (entry.type === "file") {
-          if (entry.name === "cover.jpg") {
-            document.querySelector("#art").style.backgroundImage = "url('/file" + window.location.pathname + "cover.jpg')";
-            document.querySelector("link[rel='shortcut icon']").href = "/file" + window.location.pathname + "cover.jpg";
+        if (entry.type === "file" && entry.name === "cover.jpg") {
             return;
-          }
         }
         var itemNode = document.createElement("div");
         itemNode.classList.add("item");
@@ -189,6 +185,8 @@ var getListing = function() {
               document.querySelector("#player").load();
               document.title = this.innerText;
               document.querySelector('#title').innerText = this.innerText.slice(0,-4) + "\n" + decodeURI(window.location.pathname).split("/")[3];
+              document.querySelector("#art").style.backgroundImage = "url('/file" + window.location.pathname + "cover.jpg')";
+              document.querySelector("link[rel='shortcut icon']").href = "/file" + window.location.pathname + "cover.jpg";
             }
           };
         }
