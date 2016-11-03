@@ -184,7 +184,8 @@ var getListing = function() {
               document.querySelector("#player").src = '/file' + window.location.pathname + this.innerText;
               document.querySelector("#player").load();
               document.title = this.innerText;
-              document.querySelector('#title').innerText = this.innerText.slice(0,-4) + "\n" + decodeURI(window.location.pathname).split("/")[3];
+              document.querySelector('#title').innerText = this.innerText.slice(0,-4) + "\n";
+              document.querySelector('#title').innerText += decodeURI(window.location.pathname).split("/").slice(-2)[0];
               document.querySelector("#art").style.backgroundImage = "url('/file" + window.location.pathname + "cover.jpg')";
               document.querySelector("link[rel='shortcut icon']").href = "/file" + window.location.pathname + "cover.jpg";
             }
