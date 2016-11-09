@@ -84,6 +84,7 @@
     left: 0;
     right: 0;
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .icon {
@@ -203,7 +204,7 @@ var getListing = function() {
         document.querySelector("#list").appendChild(itemNode);
       });
 
-    })(JSON.parse(xhr.responseText));
+    }(JSON.parse(xhr.responseText)));
 
   };
   xhr.send();
