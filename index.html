@@ -189,6 +189,23 @@ var getListing = function() {
               document.querySelector('#title').innerText += decodeURI(window.location.pathname).split("/").slice(-2)[0];
               document.querySelector("#art").style.backgroundImage = "url('/file" + window.location.pathname + "cover.jpg')";
               document.querySelector("link[rel='shortcut icon']").href = "/file" + window.location.pathname + "cover.jpg";
+              if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                  title: this.innerText.slice(0,-4),
+                  artist: '',
+                  album: decodeURI(window.location.pathname).split("/").slice(-2)[0],
+                  artwork: [
+                    { src: '/file' + window.location.pathname + 'cover.jpg', sizes: '500x500', type: 'image/jpeg' }
+                  ]
+                });
+                navigator.mediaSession.setActionHandler('play', function() {document.querySelector("#player").play()});
+                navigator.mediaSession.setActionHandler('pause', function() {document.querySelector("#player").pause()});
+                navigator.mediaSession.setActionHandler('seekbackward', function() {document.querySelector("#player").currentTime = document.querySelector("#player").currentTime - 5});
+                navigator.mediaSession.setActionHandler('seekforward', function() {document.querySelector("#player").currentTime = document.querySelector("#player").currentTime + 5});
+                var index = Array.prototype.indexOf.call(document.querySelector(".item.highlight").parentNode.children, document.querySelector(".item.highlight")) + 1;
+                navigator.mediaSession.setActionHandler('previoustrack', function() {document.querySelector(`.item:nth-child(${index-1})`).onmouseup({which: 1})});
+                navigator.mediaSession.setActionHandler('nexttrack', function() {document.querySelector(`.item:nth-child(${index+1})`).onmouseup({which: 1});});
+              }
             }
           };
         }
