@@ -252,4 +252,18 @@ window.onkeydown = function(event) {
   if (event.which == 32)
     event.preventDefault();
 };
+
+player.onended = function(){
+  if(!player.loop){
+    for(var i = 0; i < document.querySelectorAll(".item").length; i++){
+      if(document.querySelectorAll(".item")[i].classList.length === 2){
+        let evt = document.createEvent("MouseEvents");
+        evt.initEvent("mouseup", true, true);
+        document.querySelectorAll(".item")[i+1].dispatchEvent(evt);
+        break;
+      }
+    }
+  }
+}
+
 </script>
