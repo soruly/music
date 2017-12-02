@@ -167,7 +167,7 @@ var getListing = function() {
         }
         var itemNode = document.createElement("div");
         itemNode.classList.add("item");
-        if (entry.type === "directory") {
+        if (entry.type === "directory" || entry.type === "other") {
           itemNode.innerHTML = '<svg class="icon"><use xlink:href="#icon-folder"></use></svg>';
           itemNode.onmouseup = function(event) {
             if (event.which === 1) {
