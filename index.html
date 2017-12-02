@@ -160,7 +160,8 @@ var getListing = function() {
       document.querySelector("#art").style.backgroundImage = "url()";
       document.querySelector("link[rel='shortcut icon']").href = "";
 
-      fileList.forEach(function(entry) {
+      fileList.sort(function(a,b){ return new Date(b.mtime) - new Date(a.mtime) })
+        .forEach(function(entry) {
         if (entry.type === "file" && entry.name === "cover.jpg") {
             return;
         }
