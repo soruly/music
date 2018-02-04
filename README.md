@@ -19,11 +19,11 @@ server {
         location /api {
             autoindex on;
             autoindex_format json;
-            alias "/mnt/Data/Music";
+            alias "/mnt/data/music";
         }
 
         location /file {
-            alias "/mnt/Data/Music";
+            alias "/mnt/data/music";
         }
 }
 ```
