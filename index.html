@@ -30,57 +30,25 @@
   }
 
   #console {
-    display: flex;
-    flex-direction: row;
-    align-content: flex-end;
+    background: #f1f3f4;
     z-index: 1;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     width: 100%;
-    height: 6rem;
+    height: 54px;
     box-shadow: 0 0 1rem rgba(0,0,0,0.2);
-  }
-
-  #info {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-    height: 100%;
-  }
-
-  #title {
-    flex: 1 0 auto;
-    width: 100%;
-    height: 2rem;
-    line-height: 1.5rem;
-    padding: 0 0.5rem 0 0.5rem;
-    font-size: 0.8rem;
-  }
-
-  #title:first-line {
-    font-size: 1rem;
   }
 
   #player {
     width: 100%;
-    height: 2rem;
-  }
-
-  #art {
-    flex: 0 1 auto;
-    background-image: url();
-    background-repeat: no-repeat;
-    background-size: cover;
-    width: 6rem;
-    height: 6rem;
   }
 
   #list {
     position: fixed;
     top: 0;
-    bottom: 6rem;
+    bottom: 54px;
     left: 0;
     right: 0;
     overflow: auto;
@@ -124,11 +92,7 @@
 
 <div id="list"></div>
 <div id="console">
-  <div id="art"></div>
-  <div id="info">
-    <div id="title"></div>
-    <audio id="player" autoplay loop controls></audio>
-  </div>
+  <audio id="player" autoplay loop controls></audio>
 </div>
 
 <script>
@@ -157,7 +121,6 @@ var getListing = function() {
 
     (function(fileList) {
 
-      document.querySelector("#art").style.backgroundImage = "url()";
       document.querySelector("link[rel='shortcut icon']").href = "";
 
       fileList.sort(function(a,b){ return new Date(b.mtime) - new Date(a.mtime) })
@@ -186,9 +149,6 @@ var getListing = function() {
               document.querySelector("#player").src = '/file' + window.location.pathname + this.innerText;
               document.querySelector("#player").load();
               document.title = this.innerText;
-              document.querySelector('#title').innerText = this.innerText.slice(0,-4) + "\n";
-              document.querySelector('#title').innerText += decodeURI(window.location.pathname).split("/").slice(-2)[0];
-              document.querySelector("#art").style.backgroundImage = "url('/file" + window.location.pathname + "cover.jpg')";
               document.querySelector("link[rel='shortcut icon']").href = "/file" + window.location.pathname + "cover.jpg";
               if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
