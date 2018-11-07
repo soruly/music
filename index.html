@@ -139,7 +139,7 @@ var getListing = function() {
             }
           };
         }
-        else if(entry.name.substr(-4).toLowerCase() === ".mp3" || entry.name.substr(-5).toLowerCase() === ".flac") {
+        else if([".mp3", "flac", ".m4a", ".ogg"].includes(entry.name.substr(-4).toLowerCase())) {
           itemNode.innerHTML = '<svg class="icon"><use xlink:href="#icon-music"></use></svg>';
           itemNode.onmouseup = function(event) {
             if (event.which === 1) {
