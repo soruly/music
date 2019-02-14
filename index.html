@@ -90,141 +90,155 @@
 </symbol>
 </svg>
 
-<div id="list"></div>
+<div id="list">Initializing...</div>
 <div id="console">
   <audio id="player" autoplay loop controls></audio>
 </div>
 
 <script>
-var xhr = new XMLHttpRequest();
-var getListing = function() {
-
-  var clearListTimer = setTimeout(function() {
-    var listNode = document.querySelector("#list");
+const player = document.querySelector("#player");
+const getListing = async () => {
+  const clearListTimer = setTimeout(() => {
+    const listNode = document.querySelector("#list");
     while (listNode.firstChild) {
       listNode.removeChild(listNode.firstChild);
     }
     listNode.appendChild(document.createTextNode("Loading..."));
-  },200);
+  }, 200);
 
-  xhr.open("GET", '/api' + window.location.pathname, true);
-  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-  xhr.onreadystatechange = function() {
+  const fileList = await fetch(`/api${window.location.pathname}`).then((res) => res.json());
 
-    if (xhr.readyState != 4 || xhr.status != 200) return;
+  clearTimeout(clearListTimer);
+  const listNode = document.querySelector("#list");
+  while (listNode.firstChild) {
+    listNode.removeChild(listNode.firstChild);
+  }
 
-    clearTimeout(clearListTimer);
-    var listNode = document.querySelector("#list");
-    while (listNode.firstChild) {
-      listNode.removeChild(listNode.firstChild);
-    }
+  document.querySelector("link[rel='shortcut icon']").href = "";
 
-    (function(fileList) {
-
-      document.querySelector("link[rel='shortcut icon']").href = "";
-
-      fileList.sort(function(a,b){ return new Date(b.mtime) - new Date(a.mtime) })
-        .forEach(function(entry) {
-        if (entry.type === "file" && entry.name === "cover.jpg") {
-            return;
-        }
-        var itemNode = document.createElement("div");
-        itemNode.classList.add("item");
-        if (entry.type === "directory" || entry.type === "other") {
-          itemNode.innerHTML = '<svg class="icon"><use xlink:href="#icon-folder"></use></svg>';
-          itemNode.onmouseup = function(event) {
-            if (event.which === 1) {
-              history.pushState(null, null, window.location.pathname + this.innerText + '/');
-              getListing();
+  fileList.sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
+    .forEach((entry) => {
+      if (entry.type === "file" && entry.name === "cover.jpg") {
+        return;
+      }
+      const itemNode = document.createElement("div");
+      itemNode.classList.add("item");
+      if (entry.type === "directory" || entry.type === "other") {
+        itemNode.innerHTML = "<svg class=\"icon\"><use xlink:href=\"#icon-folder\"></use></svg>";
+        itemNode.onmouseup = function (event) {
+          if (event.which === 1) {
+            history.pushState(null, null, `${window.location.pathname + this.innerText}/`);
+            getListing();
+          }
+        };
+      } else if ([
+        ".mp3",
+        "flac",
+        ".m4a",
+        ".ogg"
+      ].includes(entry.name.substr(-4).toLowerCase())) {
+        itemNode.innerHTML = "<svg class=\"icon\"><use xlink:href=\"#icon-music\"></use></svg>";
+        itemNode.onmouseup = function (event) {
+          if (event.which === 1) {
+            if (document.querySelector(".highlight")) {
+              document.querySelector(".highlight").classList.remove("highlight");
             }
-          };
-        }
-        else if([".mp3", "flac", ".m4a", ".ogg"].includes(entry.name.substr(-4).toLowerCase())) {
-          itemNode.innerHTML = '<svg class="icon"><use xlink:href="#icon-music"></use></svg>';
-          itemNode.onmouseup = function(event) {
-            if (event.which === 1) {
-              if (document.querySelector(".highlight"))
-                document.querySelector(".highlight").classList.remove("highlight");
-              this.classList.add("highlight");
-              document.querySelector("#player").src = '/file' + window.location.pathname + this.innerText;
-              document.querySelector("#player").load();
-              document.title = this.innerText;
-              document.querySelector("link[rel='shortcut icon']").href = "/file" + window.location.pathname + "cover.jpg";
-              if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                  title: this.innerText.slice(0,-4),
-                  artist: '',
-                  album: decodeURI(window.location.pathname).split("/").slice(-2)[0],
-                  artwork: [
-                    { src: '/file' + window.location.pathname + 'cover.jpg', sizes: '500x500', type: 'image/jpeg' }
-                  ]
-                });
-                navigator.mediaSession.setActionHandler('play', function() {document.querySelector("#player").play()});
-                navigator.mediaSession.setActionHandler('pause', function() {document.querySelector("#player").pause()});
-                navigator.mediaSession.setActionHandler('seekbackward', function() {document.querySelector("#player").currentTime = document.querySelector("#player").currentTime - 5});
-                navigator.mediaSession.setActionHandler('seekforward', function() {document.querySelector("#player").currentTime = document.querySelector("#player").currentTime + 5});
-                var index = Array.prototype.indexOf.call(document.querySelector(".item.highlight").parentNode.children, document.querySelector(".item.highlight")) + 1;
-                navigator.mediaSession.setActionHandler('previoustrack', function() {document.querySelector(`.item:nth-child(${index-1})`).onmouseup({which: 1})});
-                navigator.mediaSession.setActionHandler('nexttrack', function() {document.querySelector(`.item:nth-child(${index+1})`).onmouseup({which: 1});});
-              }
+            this.classList.add("highlight");
+            player.src = `/file${window.location.pathname}${this.innerText}`;
+            player.load();
+            document.title = this.innerText;
+            document.querySelector("link[rel='shortcut icon']").href = `/file${window.location.pathname}cover.jpg`;
+            if ("mediaSession" in navigator) {
+              navigator.mediaSession.metadata = new MediaMetadata({
+                title: this.innerText.slice(0, -4),
+                artist: "",
+                album: decodeURI(window.location.pathname).split("/").slice(-2)[0],
+                artwork: [
+                  {
+                    src: `/file${window.location.pathname}cover.jpg`,
+                    sizes: "500x500",
+                    type: "image/jpeg"
+                  }
+                ]
+              });
+              navigator.mediaSession.setActionHandler("play", () => {
+                player.play();
+              });
+              navigator.mediaSession.setActionHandler("pause", () => {
+                player.pause();
+              });
+              navigator.mediaSession.setActionHandler("seekbackward", () => {
+                player.currentTime = player.currentTime - 5;
+              });
+              navigator.mediaSession.setActionHandler("seekforward", () => {
+                player.currentTime = player.currentTime + 5;
+              });
+              const index = Array.prototype.indexOf.call(document.querySelector(".item.highlight").parentNode.children, document.querySelector(".item.highlight")) + 1;
+              navigator.mediaSession.setActionHandler("previoustrack", () => {
+                document.querySelector(`.item:nth-child(${index - 1})`).onmouseup({which: 1});
+              });
+              navigator.mediaSession.setActionHandler("nexttrack", () => {
+                document.querySelector(`.item:nth-child(${index + 1})`).onmouseup({which: 1});
+              });
             }
-          };
-        }
-        else {
-          itemNode.innerHTML = '<svg class="icon"><use xlink:href="#icon-file-text2"></use></svg>';
-          itemNode.onmouseup = function(event) {
-            if (event.which === 1) {
-              window.open('/file' + window.location.pathname + this.innerText);
-            }
-          };
-        }
-        itemNode.appendChild(document.createTextNode(entry.name));
-        document.querySelector("#list").appendChild(itemNode);
-      });
-
-    }(JSON.parse(xhr.responseText)));
-
-  };
-  xhr.send();
-}
+          }
+        };
+      } else {
+        itemNode.innerHTML = "<svg class=\"icon\"><use xlink:href=\"#icon-file-text2\"></use></svg>";
+        itemNode.onmouseup = function (event) {
+          if (event.which === 1) {
+            window.open(`/file${window.location.pathname}${this.innerText}`);
+          }
+        };
+      }
+      itemNode.appendChild(document.createTextNode(entry.name));
+      document.querySelector("#list").appendChild(itemNode);
+    });
+};
 getListing();
 window.onpopstate = getListing;
 
-window.onkeyup = function(event) {
-  var player = document.querySelector("#player");
-  var seek = 5;
-  if (event.ctrlKey)
+window.onkeyup = function (event) {
+  let seek = 5;
+  if (event.ctrlKey) {
     seek = 30;
-  if (event.which == 32) //space
+  }
+  if (event.which === 32) { // space
     player.paused ? player.play() : player.pause();
-  if (event.which == 37) //left
+  }
+  if (event.which === 37) { // left
     player.currentTime = player.currentTime < seek ? 0 : player.currentTime - seek;
-  if (event.which == 39) //right
+  }
+  if (event.which === 39) { // right
     player.currentTime = player.duration - player.currentTime < seek ? player.duration : player.currentTime + seek;
-  if (event.which == 38) //up
+  }
+  if (event.which === 38) { // up
     player.volume = player.volume > 0.9 ? 1 : player.volume + 0.1;
-  if (event.which == 40) //down
+  }
+  if (event.which === 40) { // down
     player.volume = player.volume < 0.1 ? 0 : player.volume - 0.1;
+  }
 };
 
-window.onkeydown = function(event) {
-  if (event.which >= 37 && event.which <= 40)
+window.onkeydown = function (event) {
+  if (event.which >= 37 && event.which <= 40) {
     event.preventDefault();
-  if (event.which == 32)
+  }
+  if (event.which === 32) {
     event.preventDefault();
+  }
 };
 
-player.onended = function(){
-  if(!player.loop){
-    for(var i = 0; i < document.querySelectorAll(".item").length; i++){
-      if(document.querySelectorAll(".item")[i].classList.length === 2){
-        let evt = document.createEvent("MouseEvents");
+player.onended = function () {
+  if (!player.loop) {
+    for (let i = 0; i < document.querySelectorAll(".item").length; i++) {
+      if (document.querySelectorAll(".item")[i].classList.length === 2) {
+        const evt = document.createEvent("MouseEvents");
         evt.initEvent("mouseup", true, true);
-        document.querySelectorAll(".item")[i+1].dispatchEvent(evt);
+        document.querySelectorAll(".item")[i + 1].dispatchEvent(evt);
         break;
       }
     }
   }
-}
-
+};
 </script>
