@@ -127,7 +127,7 @@ const getListing = async () => {
         itemNode.innerHTML = "<svg class=\"icon\"><use xlink:href=\"#icon-folder\"></use></svg>";
         itemNode.onmouseup = function (event) {
           if (event.which === 1) {
-            history.pushState(null, null, `${window.location.pathname + this.innerText}/`);
+            history.pushState(null, null, `${window.location.pathname + this.textContent}/`);
             getListing();
           }
         };
@@ -144,13 +144,13 @@ const getListing = async () => {
               document.querySelector(".highlight").classList.remove("highlight");
             }
             this.classList.add("highlight");
-            player.src = `/file${window.location.pathname}${this.innerText}`;
+            player.src = `/file${window.location.pathname}${this.textContent}`;
             player.load();
-            document.title = this.innerText;
+            document.title = this.textContent;
             document.querySelector("link[rel='shortcut icon']").href = `/file${window.location.pathname}cover.jpg`;
             if ("mediaSession" in navigator) {
               navigator.mediaSession.metadata = new MediaMetadata({
-                title: this.innerText.slice(0, -4),
+                title: this.textContent.slice(0, -4),
                 artist: "",
                 album: decodeURI(window.location.pathname).split("/").slice(-2)[0],
                 artwork: [
@@ -187,7 +187,7 @@ const getListing = async () => {
         itemNode.innerHTML = "<svg class=\"icon\"><use xlink:href=\"#icon-file-text2\"></use></svg>";
         itemNode.onmouseup = function (event) {
           if (event.which === 1) {
-            window.open(`/file${window.location.pathname}${this.innerText}`);
+            window.open(`/file${window.location.pathname}${this.textContent}`);
           }
         };
       }
