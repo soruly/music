@@ -27,6 +27,22 @@
     cursor: pointer;
   }
 
+  .folder::before {
+    content: "📁";
+  }
+
+  .file::before {
+    content: "❓";
+  }
+
+  .music::before {
+    content: "🎵";
+  }
+
+  .picture::before {
+    content: "🖼";
+  }
+
   .highlight,
   .highlight:hover {
     background-color: #eef;
@@ -64,61 +80,80 @@
   }
 </style>
 
-<!--https://icomoon.io/app/#/select/image-->
-<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-  <symbol id="icon-music" viewBox="0 0 32 32">
-    <path
-      class="path1"
-      d="M30 0h2v23c0 2.761-3.134 5-7 5s-7-2.239-7-5c0-2.761 3.134-5 7-5 1.959 0 3.729 0.575 5 1.501v-11.501l-16 3.556v15.444c0 2.761-3.134 5-7 5s-7-2.239-7-5c0-2.761 3.134-5 7-5 1.959 0 3.729 0.575 5 1.501v-19.501l18-4z"
-    ></path>
-  </symbol>
-  <symbol id="icon-folder" viewBox="0 0 32 32">
-    <path class="path1" d="M14 4l4 4h14v22h-32v-26z"></path>
-  </symbol>
-  <symbol id="icon-file-text2" viewBox="0 0 32 32">
-    <path
-      class="path1"
-      d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"
-    ></path>
-    <path
-      class="path2"
-      d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"
-    ></path>
-    <path
-      class="path3"
-      d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"
-    ></path>
-    <path
-      class="path4"
-      d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"
-    ></path>
-  </symbol>
-  <symbol id="icon-play3" viewBox="0 0 32 32">
-    <path class="path1" d="M6 4l20 12-20 12z"></path>
-  </symbol>
-  <symbol id="icon-pause2" viewBox="0 0 32 32">
-    <path class="path1" d="M4 4h10v24h-10zM18 4h10v24h-10z"></path>
-  </symbol>
-  <symbol id="icon-stop2" viewBox="0 0 32 32">
-    <path class="path1" d="M4 4h24v24h-24z"></path>
-  </symbol>
-</svg>
-
-<div id="list">Initializing...</div>
 <audio id="player" autoplay loop controls></audio>
+
+<div id="list">Loading...</div>
 
 <script>
   const player = document.querySelector("#player");
-  document.querySelector("#list").style.bottom = getComputedStyle(
-    player
-  ).height;
+
+  const folderNodeUp = function (event) {
+    if (event.which !== 1) return;
+    history.pushState(
+      null,
+      null,
+      `${window.location.pathname}${this.textContent}/`
+    );
+    getListing();
+  };
+
+  const fileNodeUp = function (event) {
+    if (event.which !== 1) return;
+    window.open(`/file${window.location.pathname}${this.textContent}`);
+  };
+
+  const musicNodeUp = function (event) {
+    if (event.which !== 1) return;
+    if (document.querySelector(".highlight")) {
+      document.querySelector(".highlight").classList.remove("highlight");
+    }
+    this.classList.add("highlight");
+    player.src = `/file${window.location.pathname}${this.textContent}`;
+    player.load();
+    document.title = this.textContent;
+    if (!"mediaSession" in navigator) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: this.textContent.slice(0, -4),
+      artist: "",
+      album: decodeURI(window.location.pathname).split("/").slice(-2)[0],
+      artwork: [
+        {
+          src: `/file${window.location.pathname}cover.jpg`,
+          sizes: "500x500",
+          type: "image/jpeg",
+        },
+      ],
+    });
+    navigator.mediaSession.setActionHandler("play", () => {
+      player.play();
+    });
+    navigator.mediaSession.setActionHandler("pause", () => {
+      player.pause();
+    });
+    navigator.mediaSession.setActionHandler("seekbackward", () => {
+      player.currentTime = player.currentTime - 5;
+    });
+    navigator.mediaSession.setActionHandler("seekforward", () => {
+      player.currentTime = player.currentTime + 5;
+    });
+    navigator.mediaSession.setActionHandler("previoustrack", () => {
+      document
+        .querySelector(".highlight")
+        .previousSibling.onmouseup({ which: 1 });
+    });
+    navigator.mediaSession.setActionHandler("nexttrack", () => {
+      document.querySelector(".highlight").nextSibling.onmouseup({ which: 1 });
+    });
+  };
+
   const getListing = async () => {
     const clearListTimer = setTimeout(() => {
-      const listNode = document.querySelector("#list");
-      while (listNode.firstChild) {
-        listNode.removeChild(listNode.firstChild);
-      }
+      document.body.removeChild(document.querySelector("#list"));
+      const listNode = document.createElement("div");
+      listNode.id = "list";
+      listNode.style.bottom = getComputedStyle(player).height;
       listNode.appendChild(document.createTextNode("Loading..."));
+      document.body.appendChild(listNode);
     }, 200);
 
     const fileList = await fetch(
@@ -126,115 +161,40 @@
     ).then((res) => res.json());
 
     clearTimeout(clearListTimer);
-    const listNode = document.querySelector("#list");
-    while (listNode.firstChild) {
-      listNode.removeChild(listNode.firstChild);
+    document.body.removeChild(document.querySelector("#list"));
+    const listNode = document.createElement("div");
+    listNode.id = "list";
+    listNode.style.bottom = getComputedStyle(player).height;
+
+    for (const { type, name } of fileList.sort(
+      (a, b) => new Date(b.mtime) - new Date(a.mtime)
+    )) {
+      const itemNode = document.createElement("div");
+      itemNode.classList.add("item");
+      if (
+        [".mp3", "flac", ".m4a", ".ogg", ".wav"].includes(
+          name.substr(-4).toLowerCase()
+        )
+      ) {
+        itemNode.classList.add("music");
+        itemNode.onmouseup = musicNodeUp;
+      } else if (type === "directory" || type === "other") {
+        itemNode.classList.add("folder");
+        itemNode.onmouseup = folderNodeUp;
+      } else if (
+        [".jpg", ".png", ".bmp"].includes(name.substr(-4).toLowerCase())
+      ) {
+        itemNode.classList.add("picture");
+        itemNode.onmouseup = fileNodeUp;
+      } else {
+        itemNode.classList.add("file");
+        itemNode.onmouseup = fileNodeUp;
+      }
+      itemNode.appendChild(document.createTextNode(name));
+      listNode.appendChild(itemNode);
     }
 
-    document.querySelector("link[rel='shortcut icon']").href = "";
-
-    fileList
-      .sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
-      .forEach((entry) => {
-        if (entry.type === "file" && entry.name === "cover.jpg") {
-          return;
-        }
-        const itemNode = document.createElement("div");
-        itemNode.classList.add("item");
-        if (entry.type === "directory" || entry.type === "other") {
-          itemNode.innerHTML =
-            '<svg class="icon"><use xlink:href="#icon-folder"></use></svg>';
-          itemNode.onmouseup = function (event) {
-            if (event.which === 1) {
-              history.pushState(
-                null,
-                null,
-                `${window.location.pathname + this.textContent}/`
-              );
-              getListing();
-            }
-          };
-        } else if (
-          [".mp3", "flac", ".m4a", ".ogg"].includes(
-            entry.name.substr(-4).toLowerCase()
-          )
-        ) {
-          itemNode.innerHTML =
-            '<svg class="icon"><use xlink:href="#icon-music"></use></svg>';
-          itemNode.onmouseup = function (event) {
-            if (event.which === 1) {
-              if (document.querySelector(".highlight")) {
-                document
-                  .querySelector(".highlight")
-                  .classList.remove("highlight");
-              }
-              this.classList.add("highlight");
-              player.src = `/file${window.location.pathname}${this.textContent}`;
-              player.load();
-              document.title = this.textContent;
-              document.querySelector(
-                "link[rel='shortcut icon']"
-              ).href = `/file${window.location.pathname}cover.jpg`;
-              if ("mediaSession" in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                  title: this.textContent.slice(0, -4),
-                  artist: "",
-                  album: decodeURI(window.location.pathname)
-                    .split("/")
-                    .slice(-2)[0],
-                  artwork: [
-                    {
-                      src: `/file${window.location.pathname}cover.jpg`,
-                      sizes: "500x500",
-                      type: "image/jpeg",
-                    },
-                  ],
-                });
-                navigator.mediaSession.setActionHandler("play", () => {
-                  player.play();
-                });
-                navigator.mediaSession.setActionHandler("pause", () => {
-                  player.pause();
-                });
-                navigator.mediaSession.setActionHandler("seekbackward", () => {
-                  player.currentTime = player.currentTime - 5;
-                });
-                navigator.mediaSession.setActionHandler("seekforward", () => {
-                  player.currentTime = player.currentTime + 5;
-                });
-                const index =
-                  Array.prototype.indexOf.call(
-                    document.querySelector(".item.highlight").parentNode
-                      .children,
-                    document.querySelector(".item.highlight")
-                  ) + 1;
-                navigator.mediaSession.setActionHandler("previoustrack", () => {
-                  document
-                    .querySelector(`.item:nth-child(${index - 1})`)
-                    .onmouseup({ which: 1 });
-                });
-                navigator.mediaSession.setActionHandler("nexttrack", () => {
-                  document
-                    .querySelector(`.item:nth-child(${index + 1})`)
-                    .onmouseup({ which: 1 });
-                });
-              }
-            }
-          };
-        } else {
-          itemNode.innerHTML =
-            '<svg class="icon"><use xlink:href="#icon-file-text2"></use></svg>';
-          itemNode.onmouseup = function (event) {
-            if (event.which === 1) {
-              window.open(
-                `/file${window.location.pathname}${this.textContent}`
-              );
-            }
-          };
-        }
-        itemNode.appendChild(document.createTextNode(entry.name));
-        document.querySelector("#list").appendChild(itemNode);
-      });
+    document.body.appendChild(listNode);
   };
   getListing();
   window.onpopstate = getListing;
@@ -245,50 +205,34 @@
       seek = 30;
     }
     if (event.which === 32) {
-      // space
-      player.paused ? player.play() : player.pause();
+      player.src && player.paused ? player.play() : player.pause();
     }
     if (event.which === 37) {
-      // left
       player.currentTime =
         player.currentTime < seek ? 0 : player.currentTime - seek;
     }
     if (event.which === 39) {
-      // right
       player.currentTime =
         player.duration - player.currentTime < seek
           ? player.duration
           : player.currentTime + seek;
     }
     if (event.which === 38) {
-      // up
       player.volume = player.volume > 0.9 ? 1 : player.volume + 0.1;
     }
     if (event.which === 40) {
-      // down
       player.volume = player.volume < 0.1 ? 0 : player.volume - 0.1;
     }
   };
 
   window.onkeydown = function (event) {
-    if (event.which >= 37 && event.which <= 40) {
-      event.preventDefault();
-    }
-    if (event.which === 32) {
+    if ([32, 37, 38, 39, 40].includes(event.which)) {
       event.preventDefault();
     }
   };
 
   player.onended = function () {
-    if (!player.loop) {
-      for (let i = 0; i < document.querySelectorAll(".item").length; i++) {
-        if (document.querySelectorAll(".item")[i].classList.length === 2) {
-          const evt = document.createEvent("MouseEvents");
-          evt.initEvent("mouseup", true, true);
-          document.querySelectorAll(".item")[i + 1].dispatchEvent(evt);
-          break;
-        }
-      }
-    }
+    if (player.loop) return;
+    document.querySelector(".highlight").nextSibling.onmouseup({ which: 1 });
   };
 </script>
