@@ -10,16 +10,21 @@
   body {
     margin: 0;
     padding: 0;
-    font: 1rem sans-serif;
+    font-size: 1rem;
+    font-family: system-ui, sans-serif;
   }
 
   .item {
     padding: 0.5rem;
     font-size: 1rem;
+    line-height: 1rem;
+    white-space: nowrap;
   }
 
-  .item > .icon {
-    margin: 0 0.5rem 0 0;
+  @media (pointer: fine) {
+    .item {
+      padding: 0.3rem;
+    }
   }
 
   .item:hover {
@@ -28,19 +33,19 @@
   }
 
   .folder::before {
-    content: "📁";
+    content: "📁 ";
   }
 
   .file::before {
-    content: "❓";
+    content: "❓ ";
   }
 
   .music::before {
-    content: "🎵";
+    content: "🎵 ";
   }
 
   .picture::before {
-    content: "🖼";
+    content: "🖼 ";
   }
 
   .highlight,
