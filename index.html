@@ -93,17 +93,25 @@
   const player = document.querySelector("#player");
 
   const folderNodeUp = function (event) {
-    if (event.which !== 1) return;
-    history.pushState(null, null, `${window.location.pathname}${this.textContent}/`);
-    getListing();
+    if (event.which === 1) {
+      history.pushState(null, null, `${window.location.pathname}${this.textContent}/`);
+      getListing();
+    } else if (event.which === 2) {
+      window.open(`${window.location.pathname}${this.textContent}/`);
+    }
   };
 
   const fileNodeUp = function (event) {
-    if (event.which !== 1) return;
-    window.open(`/file${window.location.pathname}${this.textContent}`);
+    if (event.which === 1 || event.which === 2) {
+      window.open(`/file${window.location.pathname}${this.textContent}`);
+    }
   };
 
   const musicNodeUp = function (event) {
+    if (event.which === 2) {
+      window.open(`/file${window.location.pathname}${this.textContent}`);
+      return;
+    }
     if (event.which !== 1) return;
     if (document.querySelector(".highlight")) {
       document.querySelector(".highlight").classList.remove("highlight");
