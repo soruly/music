@@ -94,11 +94,7 @@
 
   const folderNodeUp = function (event) {
     if (event.which !== 1) return;
-    history.pushState(
-      null,
-      null,
-      `${window.location.pathname}${this.textContent}/`
-    );
+    history.pushState(null, null, `${window.location.pathname}${this.textContent}/`);
     getListing();
   };
 
@@ -142,9 +138,7 @@
       player.currentTime = player.currentTime + 5;
     });
     navigator.mediaSession.setActionHandler("previoustrack", () => {
-      document
-        .querySelector(".highlight")
-        .previousSibling.onmouseup({ which: 1 });
+      document.querySelector(".highlight").previousSibling.onmouseup({ which: 1 });
     });
     navigator.mediaSession.setActionHandler("nexttrack", () => {
       document.querySelector(".highlight").nextSibling.onmouseup({ which: 1 });
@@ -161,9 +155,7 @@
       document.body.appendChild(listNode);
     }, 200);
 
-    const fileList = await fetch(
-      `/api${window.location.pathname}`
-    ).then((res) => res.json());
+    const fileList = await fetch(`/api${window.location.pathname}`).then((res) => res.json());
 
     clearTimeout(clearListTimer);
     document.body.removeChild(document.querySelector("#list"));
@@ -171,24 +163,18 @@
     listNode.id = "list";
     listNode.style.bottom = getComputedStyle(player).height;
 
-    for (const { type, name } of fileList.sort(
-      (a, b) => new Date(b.mtime) - new Date(a.mtime)
-    )) {
+    for (const { type, name } of fileList.sort((a, b) => new Date(b.mtime) - new Date(a.mtime))) {
       const itemNode = document.createElement("div");
       itemNode.classList.add("item");
       if (
-        [".mp3", "flac", ".m4a", ".ogg", ".wav", "opus"].includes(
-          name.substr(-4).toLowerCase()
-        )
+        [".mp3", "flac", ".m4a", ".ogg", ".wav", "opus"].includes(name.substr(-4).toLowerCase())
       ) {
         itemNode.classList.add("music");
         itemNode.onmouseup = musicNodeUp;
       } else if (type === "directory" || type === "other") {
         itemNode.classList.add("folder");
         itemNode.onmouseup = folderNodeUp;
-      } else if (
-        [".jpg", ".png", ".bmp"].includes(name.substr(-4).toLowerCase())
-      ) {
+      } else if ([".jpg", ".png", ".bmp"].includes(name.substr(-4).toLowerCase())) {
         itemNode.classList.add("picture");
         itemNode.onmouseup = fileNodeUp;
       } else {
@@ -213,14 +199,11 @@
       player.src && player.paused ? player.play() : player.pause();
     }
     if (event.which === 37) {
-      player.currentTime =
-        player.currentTime < seek ? 0 : player.currentTime - seek;
+      player.currentTime = player.currentTime < seek ? 0 : player.currentTime - seek;
     }
     if (event.which === 39) {
       player.currentTime =
-        player.duration - player.currentTime < seek
-          ? player.duration
-          : player.currentTime + seek;
+        player.duration - player.currentTime < seek ? player.duration : player.currentTime + seek;
     }
     if (event.which === 38) {
       player.volume = player.volume > 0.9 ? 1 : player.volume + 0.1;
