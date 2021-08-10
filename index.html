@@ -154,6 +154,31 @@
     });
   };
 
+  const appendChunk = (listNode, chunk) =>
+    listNode.append(
+      ...chunk.map(({ type, name }) => {
+        const itemNode = document.createElement("div");
+        itemNode.classList.add("item");
+        if (
+          [".mp3", "flac", ".m4a", ".ogg", ".wav", "opus"].includes(name.substr(-4).toLowerCase())
+        ) {
+          itemNode.classList.add("music");
+          itemNode.onmouseup = musicNodeUp;
+        } else if (type === "directory" || type === "other") {
+          itemNode.classList.add("folder");
+          itemNode.onmouseup = folderNodeUp;
+        } else if ([".jpg", ".png", ".bmp"].includes(name.substr(-4).toLowerCase())) {
+          itemNode.classList.add("picture");
+          itemNode.onmouseup = fileNodeUp;
+        } else {
+          itemNode.classList.add("file");
+          itemNode.onmouseup = fileNodeUp;
+        }
+        itemNode.appendChild(document.createTextNode(name));
+        return itemNode;
+      })
+    );
+
   const getListing = async () => {
     const clearListTimer = setTimeout(() => {
       document.body.removeChild(document.querySelector("#list"));
@@ -171,30 +196,23 @@
     const listNode = document.createElement("div");
     listNode.id = "list";
     listNode.style.bottom = getComputedStyle(player).height;
-
-    for (const { type, name } of fileList.sort((a, b) => new Date(b.mtime) - new Date(a.mtime))) {
-      const itemNode = document.createElement("div");
-      itemNode.classList.add("item");
-      if (
-        [".mp3", "flac", ".m4a", ".ogg", ".wav", "opus"].includes(name.substr(-4).toLowerCase())
-      ) {
-        itemNode.classList.add("music");
-        itemNode.onmouseup = musicNodeUp;
-      } else if (type === "directory" || type === "other") {
-        itemNode.classList.add("folder");
-        itemNode.onmouseup = folderNodeUp;
-      } else if ([".jpg", ".png", ".bmp"].includes(name.substr(-4).toLowerCase())) {
-        itemNode.classList.add("picture");
-        itemNode.onmouseup = fileNodeUp;
-      } else {
-        itemNode.classList.add("file");
-        itemNode.onmouseup = fileNodeUp;
-      }
-      itemNode.appendChild(document.createTextNode(name));
-      listNode.appendChild(itemNode);
-    }
-
     document.body.appendChild(listNode);
+
+    const chunkList = fileList
+      .sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
+      .reduce(
+        (acc, cur, index, array) => (index % 100 ? acc : [...acc, array.slice(index, index + 100)]),
+        []
+      );
+    appendChunk(listNode, chunkList[0]);
+    for (const chunk of chunkList.slice(1)) {
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          appendChunk(listNode, chunk);
+          resolve();
+        }, 0)
+      );
+    }
   };
   getListing();
   window.onpopstate = getListing;
