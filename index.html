@@ -92,9 +92,11 @@
 
 <script>
   const player = document.querySelector("#player");
-
+  const scrollTop = [];
   const folderNodeUp = function (event) {
     if (event.which === 1) {
+      scrollTop[window.location.pathname.split("/").length - 2] =
+        document.querySelector("#list").scrollTop;
       history.pushState(null, null, `${window.location.pathname}${this.textContent}/`);
       getListing();
     } else if (event.which === 2) {
@@ -179,7 +181,8 @@
       })
     );
 
-  const getListing = async () => {
+  const getListing = async (scrollTop) => {
+    const startTime = performance.now();
     const clearListTimer = setTimeout(() => {
       document.body.removeChild(document.querySelector("#list"));
       const listNode = document.createElement("div");
@@ -201,7 +204,7 @@
     const chunkList = fileList
       .sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
       .reduce(
-        (acc, cur, index, array) => (index % 100 ? acc : [...acc, array.slice(index, index + 100)]),
+        (acc, cur, index, array) => (index % 300 ? acc : [...acc, array.slice(index, index + 300)]),
         []
       );
     appendChunk(listNode, chunkList[0]);
@@ -209,13 +212,23 @@
       await new Promise((resolve) =>
         setTimeout(() => {
           appendChunk(listNode, chunk);
+          if (
+            scrollTop &&
+            document.querySelector("#list").scrollHeight -
+              document.querySelector("#list").clientHeight >=
+              scrollTop
+          ) {
+            document.querySelector("#list").scrollTop = scrollTop;
+          }
           resolve();
         }, 0)
       );
     }
   };
   getListing();
-  window.onpopstate = getListing;
+  window.onpopstate = async () => {
+    await getListing(scrollTop[window.location.pathname.split("/").length - 2] || 0);
+  };
 
   window.onkeyup = function (event) {
     let seek = 5;
