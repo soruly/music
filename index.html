@@ -5,7 +5,7 @@
   content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 />
 <link rel="shortcut icon" type="image/jpeg" href="data:," />
-<title>Music</title>
+<title>🎵</title>
 <style>
   body {
     margin: 0;
@@ -53,7 +53,14 @@
     background-color: #eef;
   }
 
-  #player {
+  progress {
+    height: 2px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+  }
+
+  audio {
     background: #f1f3f4;
     z-index: 1;
     position: fixed;
@@ -88,10 +95,8 @@
 
 <audio id="player" autoplay loop controls></audio>
 
-<div id="list">Loading...</div>
-
 <script>
-  const player = document.querySelector("#player");
+  const player = document.querySelector("audio");
   const scrollTop = [];
   const folderNodeUp = function (event) {
     if (event.which === 1) {
@@ -184,18 +189,15 @@
   const getListing = async (scrollTop) => {
     const startTime = performance.now();
     const clearListTimer = setTimeout(() => {
-      document.body.removeChild(document.querySelector("#list"));
-      const listNode = document.createElement("div");
-      listNode.id = "list";
-      listNode.style.bottom = getComputedStyle(player).height;
-      listNode.appendChild(document.createTextNode("Loading..."));
-      document.body.appendChild(listNode);
+      document.querySelector("#list") && document.body.removeChild(document.querySelector("#list"));
+      document.body.appendChild(document.createElement("progress"));
     }, 200);
 
     const fileList = await fetch(`/api${window.location.pathname}`).then((res) => res.json());
 
     clearTimeout(clearListTimer);
-    document.body.removeChild(document.querySelector("#list"));
+    document.querySelector("#list") && document.body.removeChild(document.querySelector("#list"));
+
     const listNode = document.createElement("div");
     listNode.id = "list";
     listNode.style.bottom = getComputedStyle(player).height;
@@ -208,6 +210,8 @@
         []
       );
     appendChunk(listNode, chunkList[0]);
+    document.querySelector("progress") ||
+      document.body.appendChild(document.querySelector("progress"));
     for (const chunk of chunkList.slice(1)) {
       await new Promise((resolve) =>
         setTimeout(() => {
@@ -224,6 +228,7 @@
         }, 0)
       );
     }
+    document.body.removeChild(document.querySelector("progress"));
   };
   getListing();
   window.onpopstate = async () => {
