@@ -7,6 +7,17 @@
 <link rel="shortcut icon" type="image/jpeg" href="data:," />
 <title>🎵</title>
 <style>
+  :root {
+    scrollbar-color: #eee transparent;
+  }
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 0.2rem;
+    height: 0.2rem;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #eee;
+  }
   body {
     margin: 0;
     padding: 0;
@@ -24,6 +35,10 @@
   @media (pointer: fine) {
     .item {
       padding: 0.3rem;
+    }
+    ::-webkit-scrollbar {
+      width: 0.5rem;
+      height: 0.5rem;
     }
   }
 
@@ -74,6 +89,7 @@
     right: 0;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
 
   .icon {
