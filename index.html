@@ -85,12 +85,14 @@
     fill: currentColor;
   }
   .progress {
-    visibility: hidden;
     position: fixed;
     top: 0;
     width: 100%;
     height: 2px;
     background: rgb(137, 146, 255, 0.4);
+  }
+  .progress.hidden {
+    visibility: hidden;
   }
   .progress > div {
     position: absolute;
@@ -98,10 +100,10 @@
     height: 2px;
   }
   .progress > div:first-child {
-    animation: increase 2s infinite;
+    animation: increase 4s infinite;
   }
   .progress > div:last-child {
-    animation: decrease 2s 0.5s infinite;
+    animation: decrease 4s 2s infinite;
   }
   @keyframes increase {
     from {
@@ -224,9 +226,8 @@
   const getListing = async (scrollTop) => {
     const startTime = performance.now();
     const clearListTimer = setTimeout(() => {
-      document.querySelector("#list") && document.body.removeChild(document.querySelector("#list"));
-      document.querySelector(".progress").style.visibility = "visible";
-    }, 200);
+      document.querySelector(".progress").classList.remove("hidden");
+    }, 300);
 
     const fileList = await fetch(`/api${window.location.pathname}`).then((res) => res.json());
 
@@ -245,7 +246,7 @@
         []
       );
     appendChunk(listNode, chunkList[0]);
-    document.querySelector(".progress").style.visibility = "visible";
+    document.querySelector(".progress").classList.remove("hidden");
     for (const chunk of chunkList.slice(1)) {
       await new Promise((resolve) =>
         setTimeout(() => {
@@ -259,10 +260,10 @@
             document.querySelector("#list").scrollTop = scrollTop;
           }
           resolve();
-        }, 0)
+        }, 50)
       );
     }
-    document.querySelector(".progress").style.visibility = "hidden";
+    document.querySelector(".progress").classList.add("hidden");
   };
   getListing();
   window.onpopstate = async () => {
