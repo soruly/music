@@ -157,22 +157,26 @@
     if (event.which === 1) {
       scrollTop[window.location.pathname.split("/").length - 2] =
         document.querySelector("#list").scrollTop;
-      history.pushState(null, null, `${window.location.pathname}${this.textContent}/`);
+      history.pushState(
+        null,
+        null,
+        `${window.location.pathname}${encodeURIComponent(this.textContent)}/`
+      );
       getListing();
     } else if (event.which === 2) {
-      window.open(`${window.location.pathname}${this.textContent}/`);
+      window.open(`${window.location.pathname}${encodeURIComponent(this.textContent)}/`);
     }
   };
 
   const fileNodeUp = function (event) {
     if (event.which === 1 || event.which === 2) {
-      window.open(`/file${window.location.pathname}${this.textContent}`);
+      window.open(`/file${window.location.pathname}${encodeURIComponent(this.textContent)}`);
     }
   };
 
   const musicNodeUp = function (event) {
     if (event.which === 2) {
-      window.open(`/file${window.location.pathname}${this.textContent}`);
+      window.open(`/file${window.location.pathname}${encodeURIComponent(this.textContent)}`);
       return;
     }
     if (event.which !== 1) return;
@@ -180,7 +184,7 @@
       document.querySelector(".highlight").classList.remove("highlight");
     }
     this.classList.add("highlight");
-    player.src = `/file${window.location.pathname}${this.textContent}`;
+    player.src = `/file${window.location.pathname}${encodeURIComponent(this.textContent)}`;
     player.load();
     document.title = this.textContent;
     if (!"mediaSession" in navigator) return;
