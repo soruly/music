@@ -9,6 +9,18 @@
 <style>
   :root {
     scrollbar-color: #ccc transparent;
+    --low-color: #fff;
+    --mid-color: #999;
+    --high-color: #333;
+    --highlight-color: #eee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --low-color: #333;
+      --mid-color: #999;
+      --high-color: #fff;
+      --highlight-color: #666;
+    }
   }
   body {
     margin: 0;
@@ -16,6 +28,8 @@
     font-size: 1rem;
     font-family: system-ui, sans-serif;
     overflow: hidden;
+    background-color: var(--low-color);
+    color: var(--high-color);
   }
   .item {
     padding: 0.5rem;
@@ -33,14 +47,14 @@
       height: 0.75rem;
     }
     ::-webkit-scrollbar-thumb {
-      background: #ccc;
+      background: var(--mid-color);
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #999;
+      background: var(--mid-color);
     }
   }
   .item:hover {
-    background-color: #eee;
+    background-color: var(--highlight-color);
     cursor: pointer;
   }
   .folder::before {
@@ -57,7 +71,7 @@
   }
   .highlight,
   .highlight:hover {
-    background-color: #eef;
+    background-color: var(--highlight-color);
   }
   audio {
     background: #f1f3f4;
@@ -70,7 +84,7 @@
     box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
     outline: 0;
   }
-  #list {
+  .list {
     position: fixed;
     top: 0;
     bottom: 54px;
@@ -92,7 +106,7 @@
   .progress:after {
     content: "";
     position: absolute;
-    background: #999;
+    background: var(--mid-color);
     height: 0.125rem;
   }
   .progress.hidden:before,
@@ -134,7 +148,7 @@
   const folderNodeUp = function (event) {
     if (event.which === 1) {
       scrollTop[window.location.pathname.split("/").length - 2] =
-        document.querySelector("#list").scrollTop;
+        document.querySelector(".list").scrollTop;
       history.pushState(
         null,
         null,
@@ -214,9 +228,9 @@
   const getListing = async (scrollTop) => {
     document.querySelector(".progress").classList.remove("hidden");
     const fileList = await fetch(`/api${window.location.pathname}`).then((res) => res.json());
-    document.querySelector("#list") && document.body.removeChild(document.querySelector("#list"));
+    document.querySelector(".list") && document.body.removeChild(document.querySelector(".list"));
     const listNode = document.createElement("div");
-    listNode.id = "list";
+    listNode.classList.add("list");
     listNode.style.bottom = getComputedStyle(player).height;
     document.body.appendChild(listNode);
     const chunkList = fileList
@@ -233,11 +247,11 @@
           appendChunk(listNode, chunk);
           if (
             scrollTop &&
-            document.querySelector("#list").scrollHeight -
-              document.querySelector("#list").clientHeight >=
+            document.querySelector(".list").scrollHeight -
+              document.querySelector(".list").clientHeight >=
               scrollTop
           ) {
-            document.querySelector("#list").scrollTop = scrollTop;
+            document.querySelector(".list").scrollTop = scrollTop;
           }
           resolve();
         }, 50)
