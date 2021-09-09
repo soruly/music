@@ -103,24 +103,26 @@
     position: fixed;
     top: 0;
     width: 100%;
-    height: 2px;
+    height: 0.125rem;
   }
   .progress.hidden {
     visibility: hidden;
   }
-  .progress > div {
+  .progress:before,
+  .progress:after {
+    content: "";
     position: absolute;
     background: #999;
-    height: 2px;
+    height: 0.125rem;
   }
-  .progress.hidden > div:first-child,
-  .progress.hidden > div:last-child {
+  .progress.hidden:before,
+  .progress.hidden:after {
     animation: none;
   }
-  .progress > div:first-child {
-    animation: increase 2s 0.1s infinite;
+  .progress:before {
+    animation: increase 2s 0.3s infinite;
   }
-  .progress > div:last-child {
+  .progress:after {
     animation: decrease 2s 1s infinite;
   }
   @keyframes increase {
@@ -144,10 +146,7 @@
     }
   }
 </style>
-<div class="progress hidden">
-  <div></div>
-  <div></div>
-</div>
+<div class="progress hidden"></div>
 <audio id="player" autoplay loop controls></audio>
 
 <script>
