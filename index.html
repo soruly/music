@@ -17,14 +17,12 @@
     font-family: system-ui, sans-serif;
     overflow: hidden;
   }
-
   .item {
     padding: 0.5rem;
     font-size: 1rem;
     line-height: 1rem;
     white-space: nowrap;
   }
-
   @media (pointer: fine) {
     .item {
       padding: 0.3rem;
@@ -41,33 +39,26 @@
       background: #999;
     }
   }
-
   .item:hover {
     background-color: #eee;
     cursor: pointer;
   }
-
   .folder::before {
     content: "📁 ";
   }
-
   .file::before {
     content: "❓ ";
   }
-
   .music::before {
     content: "🎵 ";
   }
-
   .picture::before {
     content: "🖼 ";
   }
-
   .highlight,
   .highlight:hover {
     background-color: #eef;
   }
-
   audio {
     background: #f1f3f4;
     z-index: 1;
@@ -77,10 +68,8 @@
     right: 0;
     width: 100%;
     box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
-    width: 100%;
     outline: 0;
   }
-
   #list {
     position: fixed;
     top: 0;
@@ -89,15 +78,6 @@
     right: 0;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
-  }
-
-  .icon {
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    stroke-width: 0;
-    stroke: currentColor;
-    fill: currentColor;
   }
   .progress {
     position: fixed;
@@ -148,7 +128,6 @@
 </style>
 <div class="progress hidden"></div>
 <audio id="player" autoplay loop controls></audio>
-
 <script>
   const player = document.querySelector("audio");
   const scrollTop = [];
@@ -166,13 +145,11 @@
       window.open(`${window.location.pathname}${encodeURIComponent(this.textContent)}/`);
     }
   };
-
   const fileNodeUp = function (event) {
     if (event.which === 1 || event.which === 2) {
       window.open(`/file${window.location.pathname}${encodeURIComponent(this.textContent)}`);
     }
   };
-
   const musicNodeUp = function (event) {
     if (event.which === 2) {
       window.open(`/file${window.location.pathname}${encodeURIComponent(this.textContent)}`);
@@ -199,18 +176,10 @@
         },
       ],
     });
-    navigator.mediaSession.setActionHandler("play", () => {
-      player.play();
-    });
-    navigator.mediaSession.setActionHandler("pause", () => {
-      player.pause();
-    });
-    navigator.mediaSession.setActionHandler("seekbackward", () => {
-      player.currentTime = player.currentTime - 5;
-    });
-    navigator.mediaSession.setActionHandler("seekforward", () => {
-      player.currentTime = player.currentTime + 5;
-    });
+    navigator.mediaSession.setActionHandler("play", () => player.play());
+    navigator.mediaSession.setActionHandler("pause", () => player.pause());
+    navigator.mediaSession.setActionHandler("seekbackward", () => (player.currentTime -= 5));
+    navigator.mediaSession.setActionHandler("seekforward", () => (player.currentTime += 5));
     navigator.mediaSession.setActionHandler("previoustrack", () => {
       document.querySelector(".highlight").previousSibling.onmouseup({ which: 1 });
     });
@@ -218,7 +187,6 @@
       document.querySelector(".highlight").nextSibling.onmouseup({ which: 1 });
     });
   };
-
   const appendChunk = (listNode, chunk) =>
     listNode.append(
       ...chunk.map(({ type, name }) => {
@@ -243,17 +211,14 @@
         return itemNode;
       })
     );
-
   const getListing = async (scrollTop) => {
     document.querySelector(".progress").classList.remove("hidden");
     const fileList = await fetch(`/api${window.location.pathname}`).then((res) => res.json());
     document.querySelector("#list") && document.body.removeChild(document.querySelector("#list"));
-
     const listNode = document.createElement("div");
     listNode.id = "list";
     listNode.style.bottom = getComputedStyle(player).height;
     document.body.appendChild(listNode);
-
     const chunkList = fileList
       .sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
       .reduce(
@@ -284,38 +249,25 @@
   window.onpopstate = async () => {
     await getListing(scrollTop[window.location.pathname.split("/").length - 2] || 0);
   };
-
-  window.onkeyup = function (event) {
-    let seek = 5;
-    if (event.ctrlKey) {
-      seek = 30;
-    }
+  window.onkeyup = (event) => {
+    const seek = event.ctrlKey ? 30 : 5;
     if (event.which === 32) {
       player.src && player.paused ? player.play() : player.pause();
-    }
-    if (event.which === 37) {
+    } else if (event.which === 37) {
       player.currentTime = player.currentTime < seek ? 0 : player.currentTime - seek;
-    }
-    if (event.which === 39) {
+    } else if (event.which === 39) {
       player.currentTime =
         player.duration - player.currentTime < seek ? player.duration : player.currentTime + seek;
-    }
-    if (event.which === 38) {
+    } else if (event.which === 38) {
       player.volume = player.volume > 0.9 ? 1 : player.volume + 0.1;
-    }
-    if (event.which === 40) {
+    } else if (event.which === 40) {
       player.volume = player.volume < 0.1 ? 0 : player.volume - 0.1;
     }
   };
-
-  window.onkeydown = function (event) {
-    if ([32, 37, 38, 39, 40].includes(event.which)) {
-      event.preventDefault();
-    }
+  window.onkeydown = (event) => {
+    if ([32, 37, 38, 39, 40].includes(event.which)) event.preventDefault();
   };
-
-  player.onended = function () {
-    if (player.loop) return;
-    document.querySelector(".highlight").nextSibling.onmouseup({ which: 1 });
+  player.onended = () => {
+    !player.loop && document.querySelector(".highlight").nextSibling.onmouseup({ which: 1 });
   };
 </script>
