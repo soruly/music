@@ -32,6 +32,7 @@
     color: var(--high-color);
   }
   .item {
+    height: 1rem;
     padding: 1rem 0.5rem;
     font-size: 1rem;
     line-height: 1rem;
@@ -236,7 +237,7 @@
     const chunkList = fileList
       .sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
       .reduce(
-        (acc, cur, index, array) => (index % 300 ? acc : [...acc, array.slice(index, index + 300)]),
+        (acc, cur, index, array) => (index % 100 ? acc : [...acc, array.slice(index, index + 100)]),
         []
       );
     appendChunk(listNode, chunkList[0]);
@@ -254,7 +255,7 @@
             document.querySelector(".list").scrollTop = scrollTop;
           }
           resolve();
-        }, 50)
+        }, 0)
       );
     }
     document.querySelector(".progress").classList.add("hidden");
