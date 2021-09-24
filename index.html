@@ -12,13 +12,15 @@
     --low-color: #fff;
     --mid-color: #999;
     --high-color: #333;
-    --highlight-color: #eee;
+    --select-color: #eee;
+    --highlight-color: #ccc;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --low-color: #333;
       --mid-color: #999;
       --high-color: #fff;
+      --select-color: #444;
       --highlight-color: #666;
     }
   }
@@ -54,8 +56,9 @@
       background: var(--mid-color);
     }
   }
+  .item.select,
   .item:hover {
-    background-color: var(--highlight-color);
+    background-color: var(--select-color);
     cursor: pointer;
   }
   .folder::before {
@@ -71,7 +74,9 @@
     content: "🖼 ";
   }
   .highlight,
-  .highlight:hover {
+  .highlight:hover,
+  .select.highlight,
+  .select.highlight:hover {
     background-color: var(--highlight-color);
   }
   audio {
@@ -93,6 +98,7 @@
     right: 0;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
+    outline: 0;
   }
   .progress {
     position: fixed;
@@ -123,41 +129,31 @@
 <script>
   const player = document.querySelector("audio");
   const scrollTop = [];
-  const folderNodeUp = function (event) {
-    if (event.which === 1) {
-      scrollTop[window.location.pathname.split("/").length - 2] =
-        document.querySelector(".list").scrollTop;
-      history.pushState(
-        null,
-        null,
-        `${window.location.pathname}${encodeURIComponent(this.textContent)}/`
-      );
-      getListing();
-    } else if (event.which === 2) {
-      window.open(`${window.location.pathname}${encodeURIComponent(this.textContent)}/`);
-    }
+  let selectedElement = null;
+  const selectedElements = new Map();
+  const openFolder = (target) => {
+    window.open(`${window.location.pathname}${encodeURIComponent(target.textContent)}/`);
   };
-  const fileNodeUp = function (event) {
-    if (event.which === 1 || event.which === 2) {
-      window.open(`/file${window.location.pathname}${encodeURIComponent(this.textContent)}`);
-    }
+  const navFolder = (path) => {
+    scrollTop[window.location.pathname.split("/").length - 2] =
+      document.querySelector(".list").scrollTop;
+    history.pushState(null, null, path);
+    getListing();
   };
-  const musicNodeUp = function (event) {
-    if (event.which === 2) {
-      window.open(`/file${window.location.pathname}${encodeURIComponent(this.textContent)}`);
-      return;
-    }
-    if (event.which !== 1) return;
+  const openFile = (target) => {
+    window.open(`/file${window.location.pathname}${encodeURIComponent(target.textContent)}`);
+  };
+  const playMusic = (target) => {
     if (document.querySelector(".highlight")) {
       document.querySelector(".highlight").classList.remove("highlight");
     }
-    this.classList.add("highlight");
-    player.src = `/file${window.location.pathname}${encodeURIComponent(this.textContent)}`;
+    target.classList.add("highlight");
+    player.src = `/file${window.location.pathname}${encodeURIComponent(target.textContent)}`;
     player.load();
-    document.title = this.textContent;
+    document.title = target.textContent;
     if (!"mediaSession" in navigator) return;
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: this.textContent.slice(0, -4),
+      title: target.textContent.slice(0, -4),
       artist: "",
       album: decodeURI(window.location.pathname).split("/").slice(-2)[0],
       artwork: [
@@ -173,11 +169,47 @@
     navigator.mediaSession.setActionHandler("seekbackward", () => (player.currentTime -= 5));
     navigator.mediaSession.setActionHandler("seekforward", () => (player.currentTime += 5));
     navigator.mediaSession.setActionHandler("previoustrack", () => {
-      document.querySelector(".highlight").previousSibling.onmouseup({ which: 1 });
+      const prev = document.querySelector(".highlight").previousElementSibling;
+      if (prev && prev.classList.contains("music")) {
+        selectedElement = prev;
+        playMusic(selectedElement);
+      }
     });
     navigator.mediaSession.setActionHandler("nexttrack", () => {
-      document.querySelector(".highlight").nextSibling.onmouseup({ which: 1 });
+      const next = document.querySelector(".highlight").nextElementSibling;
+      if (next && next.classList.contains("music")) {
+        selectedElement = next;
+        playMusic(selectedElement);
+      }
     });
+  };
+  const folderNodeUp = (event) => {
+    selectedElement?.classList.remove("select");
+    selectedElement = event.target;
+    selectedElement.classList.add("select");
+    if (event.which === 1) {
+      navFolder(`${window.location.pathname}${encodeURIComponent(event.target.textContent)}/`);
+    } else if (event.which === 2) {
+      openFolder(event.target);
+    }
+  };
+  const fileNodeUp = (event) => {
+    selectedElement?.classList.remove("select");
+    selectedElement = event.target;
+    selectedElement.classList.add("select");
+    if (event.which === 1 || event.which === 2) {
+      openFile(event.target);
+    }
+  };
+  const musicNodeUp = (event) => {
+    selectedElement?.classList.remove("select");
+    selectedElement = event.target;
+    selectedElement.classList.add("select");
+    if (event.which === 1) {
+      playMusic(event.target);
+    } else if (event.which === 2) {
+      openFile(event.target);
+    }
   };
   const appendChunk = (listNode, chunk) =>
     listNode.append(
@@ -200,10 +232,17 @@
           itemNode.onmouseup = fileNodeUp;
         }
         itemNode.appendChild(document.createTextNode(name));
+        if (
+          selectedElements.has(window.location.pathname) &&
+          selectedElements.get(window.location.pathname) === name
+        ) {
+          selectedElement = itemNode;
+        }
         return itemNode;
       })
     );
   const getListing = async (scrollTop) => {
+    selectedElement = null;
     document.querySelector(".progress").classList.remove("hidden");
     const fileList = await fetch(`/api${window.location.pathname}`).then((res) => res.json());
     document.querySelector(".list") && document.body.removeChild(document.querySelector(".list"));
@@ -214,10 +253,14 @@
     const chunkList = fileList
       .sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
       .reduce(
-        (acc, cur, index, array) => (index % 100 ? acc : [...acc, array.slice(index, index + 100)]),
+        (acc, cur, index, array) => (index % 250 ? acc : [...acc, array.slice(index, index + 250)]),
         []
       );
     appendChunk(listNode, chunkList[0]);
+    if (!selectedElements.has(window.location.pathname))
+      selectedElement = document.querySelector(".item");
+    selectedElement?.classList.add("select");
+    selectedElement?.scrollIntoView({ block: "center" });
     document.querySelector(".progress").classList.remove("hidden");
     for (const chunk of chunkList.slice(1)) {
       await new Promise((resolve) =>
@@ -234,6 +277,8 @@
           resolve();
         }, 0)
       );
+      selectedElement?.classList.add("select");
+      selectedElement?.scrollIntoView({ block: "center" });
     }
     document.querySelector(".progress").classList.add("hidden");
   };
@@ -241,25 +286,69 @@
   window.onpopstate = async () => {
     await getListing(scrollTop[window.location.pathname.split("/").length - 2] || 0);
   };
-  window.onkeyup = (event) => {
-    const seek = event.ctrlKey ? 30 : 5;
-    if (event.which === 32) {
+  window.onkeydown = (event) => {
+    if (event.key === " ") {
       player.src && player.paused ? player.play() : player.pause();
-    } else if (event.which === 37) {
-      player.currentTime = player.currentTime < seek ? 0 : player.currentTime - seek;
-    } else if (event.which === 39) {
-      player.currentTime =
-        player.duration - player.currentTime < seek ? player.duration : player.currentTime + seek;
-    } else if (event.which === 38) {
-      player.volume = player.volume > 0.9 ? 1 : player.volume + 0.1;
-    } else if (event.which === 40) {
-      player.volume = player.volume < 0.1 ? 0 : player.volume - 0.1;
+      return;
+    }
+    if (event.key === "ArrowLeft") {
+      const x = window.location.pathname.split("/");
+      x.splice(-2, 1);
+      navFolder(x.join("/"));
+      return;
+    }
+    if (event.key === "ArrowRight" && selectedElement?.classList.contains("folder")) {
+      navFolder(`${window.location.pathname}${encodeURIComponent(selectedElement.textContent)}/`);
+      return;
+    }
+    if (event.key === "Enter" && selectedElement) {
+      if (selectedElement.classList.contains("folder")) {
+        navFolder(`${window.location.pathname}${encodeURIComponent(selectedElement.textContent)}/`);
+      } else if (selectedElement.classList.contains("music")) {
+        playMusic(selectedElement);
+      } else {
+        openFile(selectedElement);
+      }
+      return;
+    }
+    if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"].includes(event.key)) {
+      selectedElement?.classList.remove("select");
+      if (!document.querySelector(".item")) return;
+    } else return;
+    const n = Math.floor(
+      document.querySelector(".list").clientHeight /
+        document.querySelector(".item").clientHeight /
+        2
+    );
+    if (event.key === "ArrowUp") {
+      selectedElement =
+        selectedElement?.previousElementSibling ?? document.querySelector(".item:last-child");
+    } else if (event.key === "ArrowDown") {
+      selectedElement = selectedElement?.nextElementSibling ?? document.querySelector(".item");
+    }
+    if (event.key === "PageUp") {
+      let targetElement = selectedElement;
+      for (let i = 0; i < n; i++) {
+        selectedElement = selectedElement.previousElementSibling ?? selectedElement;
+      }
+    } else if (event.key === "PageDown") {
+      selectedElement = selectedElement ?? document.querySelector(".item");
+      let targetElement = selectedElement;
+      for (let i = 0; i < n; i++) {
+        selectedElement = selectedElement.nextElementSibling ?? selectedElement;
+      }
+    } else if (event.key === "Home") {
+      selectedElement = document.querySelector(".item");
+    } else if (event.key === "End") {
+      selectedElement = document.querySelector(".item:last-child");
+    }
+    if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"].includes(event.key)) {
+      selectedElement.classList.add("select");
+      selectedElement.scrollIntoView({ block: "center" });
+      selectedElements.set(window.location.pathname, selectedElement.textContent);
     }
   };
-  window.onkeydown = (event) => {
-    if ([32, 37, 38, 39, 40].includes(event.which)) event.preventDefault();
-  };
   player.onended = () => {
-    !player.loop && document.querySelector(".highlight").nextSibling.onmouseup({ which: 1 });
+    !player.loop && document.querySelector(".highlight").nextElementSibling.onmouseup({ which: 1 });
   };
 </script>
