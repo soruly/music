@@ -251,7 +251,13 @@
     listNode.style.bottom = getComputedStyle(player).height;
     document.body.appendChild(listNode);
     const chunkList = fileList
-      .sort((a, b) => new Date(b.mtime) - new Date(a.mtime))
+      .sort((a, b) =>
+        window.location.pathname.split("/").length > 3
+          ? a.name > b.name
+            ? 1
+            : -1
+          : new Date(b.mtime) - new Date(a.mtime)
+      )
       .reduce(
         (acc, cur, index, array) => (index % 250 ? acc : [...acc, array.slice(index, index + 250)]),
         []
