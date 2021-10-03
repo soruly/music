@@ -293,6 +293,7 @@
     await getListing(scrollTop[window.location.pathname.split("/").length - 2] || 0);
   };
   window.onkeydown = (event) => {
+    event.preventDefault();
     if (event.key === " ") {
       player.src && player.paused ? player.play() : player.pause();
       return;
