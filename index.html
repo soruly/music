@@ -4,8 +4,16 @@
   name="viewport"
   content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 />
-<link rel="shortcut icon" type="image/jpeg" href="data:," />
+<meta name="google" content="notranslate" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<meta name="theme-color" content="#ffffff" />
 <title>🎵</title>
+<link rel="manifest" href="/manifest.json" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="apple-touch-icon" href="/favicon.png" />
 <style>
   :root {
     scrollbar-color: #ccc transparent;
@@ -388,4 +396,6 @@
   player.onended = () => {
     !player.loop && document.querySelector(".highlight").nextElementSibling.onmouseup({ which: 1 });
   };
+
+  if (navigator.serviceWorker) navigator.serviceWorker.register("/sw.js");
 </script>
