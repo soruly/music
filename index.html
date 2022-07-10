@@ -181,7 +181,7 @@
       album: decodeURI(window.location.pathname).split("/").slice(-2)[0],
       artwork: [
         {
-          src: `/file${window.location.pathname}cover.jpg`,
+          src: coverImage ? `/file${window.location.pathname}${coverImage}` : "/icon.png",
           sizes: "500x500",
           type: "image/jpeg",
         },
@@ -266,11 +266,15 @@
     );
   let sortBy = "name";
   let sortDirection = 1;
+  let coverImage = null;
   const getListing = async (scrollTop) => {
     selectedElement = null;
     document.querySelector(".progress").classList.remove("hidden");
     const fileList = await fetch(`/api${window.location.pathname}`).then((res) => res.json());
     document.querySelector(".list") && document.body.removeChild(document.querySelector(".list"));
+    coverImage = fileList
+      .filter((e) => e.type === "file")
+      .find((e) => e.name.match(/\.(jpg|png)$/i))?.name;
     const listNode = document.createElement("div");
     listNode.classList.add("list");
     listNode.style.bottom = getComputedStyle(player).height;
