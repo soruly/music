@@ -240,7 +240,7 @@
         const itemNode = document.createElement("div");
         itemNode.classList.add("item");
         if (
-          [".mp3", "flac", ".m4a", ".ogg", ".wav", "opus"].includes(name.substr(-4).toLowerCase())
+          [".mp3", "flac", ".m4a", ".ogg", ".wav", ".opus"].includes(name.substr(-4).toLowerCase())
         ) {
           itemNode.classList.add("music");
           itemNode.onmouseup = musicNodeUp;
