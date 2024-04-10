@@ -239,9 +239,7 @@
       ...chunk.map(({ type, name }) => {
         const itemNode = document.createElement("div");
         itemNode.classList.add("item");
-        if (
-          [".mp3", "flac", ".m4a", ".ogg", ".wav", ".opus"].includes(name.substr(-4).toLowerCase())
-        ) {
+        if (name.match(/\.(mp3|flac|m4a|ogg|wav|opus)$/i)) {
           itemNode.classList.add("music");
           itemNode.onmouseup = musicNodeUp;
         } else if (type === "directory" || type === "other") {
